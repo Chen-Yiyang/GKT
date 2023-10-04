@@ -108,9 +108,12 @@ dataset_path = os.path.join(args.data_dir, args.data_file)
 dkt_graph_path = os.path.join(args.dkt_graph_dir, args.dkt_graph)
 if not os.path.exists(dkt_graph_path):
     dkt_graph_path = None
-concept_num, graph, train_loader, valid_loader, test_loader = load_dataset(dataset_path, args.batch_size, args.graph_type, dkt_graph_path=dkt_graph_path,
-                                                                           train_ratio=args.train_ratio, val_ratio=args.val_ratio, shuffle=args.shuffle,
-                                                                           model_type=args.model, use_cuda=args.cuda)
+concept_num, graph, train_loader, valid_loader, test_loader = load_dataset(
+    dataset_path, args.batch_size, args.graph_type, dkt_graph_path=dkt_graph_path,
+    train_ratio=args.train_ratio, val_ratio=args.val_ratio, shuffle=args.shuffle,
+    model_type=args.model, use_cuda=args.cuda
+)
+
 
 # build models
 graph_model = None
