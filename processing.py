@@ -95,9 +95,16 @@ def load_dataset(file_path, batch_size, graph_type, dkt_graph_path=None, train_r
     seq_len_list = []
 
     def get_data(series):
-        feature_list.append(series['skill_with_answer'].tolist())
-        question_list.append(series['skill'].tolist())
-        answer_list.append(series['correct'].eq(1).astype('int').tolist())
+        # feature_list.append(series['skill_with_answer'].tolist())
+        # question_list.append(series['skill'].tolist())
+        # answer_list.append(series['correct'].eq(1).astype('int').tolist())
+
+        # TODO: check if need to shift
+        # by right, we use features from qn 1 and qn id for qn 2 to predict correctness for qn 2, and so on
+        feature_list.append(series['skill_with_answer'].tolist()[:-1])
+        question_list.append(series['skill'].tolist()[1:])
+        answer_list.append(series['correct'].eq(1).astype('int').tolist()[1:])
+
         seq_len_list.append(series['correct'].shape[0])
 
     df.groupby('user_id').apply(get_data)
