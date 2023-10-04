@@ -61,7 +61,10 @@ parser.add_argument('--test-model-dir', type=str, default='logs/expDKT', help='E
 
 
 args = parser.parse_args()
-args.cuda = not args.no_cuda and torch.cuda.is_available()
+
+# TODO: use GPU
+args.cuda = torch.cuda.is_available()
+# args.cuda = not args.no_cuda and torch.cuda.is_available()
 args.factor = not args.no_factor
 print(args)
 
@@ -206,18 +209,23 @@ def train(epoch, best_val_loss):
             else:
                 loss_vae = vae_loss(ec_list, rec_list, z_prob_list)
                 vae_train.append(float(loss_vae.cpu().detach().numpy()))
-            print('batch idx: ', batch_idx, 'loss kt: ', loss_kt.item(), 'loss vae: ', loss_vae.item(), 'auc: ', auc, 'acc: ', acc, end=' ')
+
+            if batch_idx % 10 == 0:
+                print('batch idx: ', batch_idx, 'loss kt: ', loss_kt.item(), 'loss vae: ', loss_vae.item(), 'auc: ', auc, 'acc: ', acc, end=' ')
             loss = loss_kt + loss_vae
         else:
             loss = loss_kt
-            print('batch idx: ', batch_idx, 'loss kt: ', loss_kt.item(), 'auc: ', auc, 'acc: ', acc, end=' ')
+
+            if batch_idx % 10 == 0:
+                print('batch idx: ', batch_idx, 'loss kt: ', loss_kt.item(), 'auc: ', auc, 'acc: ', acc, end=' ')
         loss_train.append(float(loss.cpu().detach().numpy()))
         loss.backward()
         optimizer.step()
         scheduler.step()
         optimizer.zero_grad()
         del loss
-        print('cost time: ', str(time.time() - t1))
+        if batch_idx % 10 == 0:
+            print('cost time: ', str(time.time() - t1))
 
     loss_val = []
     kt_val = []
