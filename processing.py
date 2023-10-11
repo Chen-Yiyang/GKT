@@ -54,6 +54,12 @@ def load_dataset(file_path, batch_size, graph_type, dkt_graph_path=None, train_r
         test_data_loader: data loader of the test dataset
     NOTE: stole some code from https://github.com/lccasagrande/Deep-Knowledge-Tracing/blob/master/deepkt/data_util.py
     """
+
+    # TODO: inspect all
+    print("___")
+    print(locals())
+    print("___")
+
     df = pd.read_csv(file_path)
     if "skill_id" not in df.columns:
         raise KeyError(f"The column 'skill_id' was not found on {file_path}")
@@ -89,9 +95,16 @@ def load_dataset(file_path, batch_size, graph_type, dkt_graph_path=None, train_r
     seq_len_list = []
 
     def get_data(series):
-        feature_list.append(series['skill_with_answer'].tolist())
-        question_list.append(series['skill'].tolist())
-        answer_list.append(series['correct'].eq(1).astype('int').tolist())
+        # feature_list.append(series['skill_with_answer'].tolist())
+        # question_list.append(series['skill'].tolist())
+        # answer_list.append(series['correct'].eq(1).astype('int').tolist())
+
+        # TODO: check if need to shift
+        # by right, we use features from qn 1 and qn id for qn 2 to predict correctness for qn 2, and so on
+        feature_list.append(series['skill_with_answer'].tolist()[:-1])
+        question_list.append(series['skill'].tolist()[1:])
+        answer_list.append(series['correct'].eq(1).astype('int').tolist()[1:])
+
         seq_len_list.append(series['correct'].shape[0])
 
     df.groupby('user_id').apply(get_data)
@@ -109,6 +122,9 @@ def load_dataset(file_path, batch_size, graph_type, dkt_graph_path=None, train_r
     # assert feature_dim == res_len * question_dim
 
     kt_dataset = KTDataset(feature_list, question_list, answer_list)
+
+    # return feature_list, question_list, answer_list
+
     train_size = int(train_ratio * student_num)
     val_size = int(val_ratio * student_num)
     test_size = student_num - train_size - val_size

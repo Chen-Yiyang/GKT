@@ -1,3 +1,9 @@
+# Custom
+notebooks
+custom_logs
+
+data/custom_data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
