@@ -143,9 +143,26 @@ def load_dataset(file_path, batch_size, graph_type, dkt_graph_path=None, train_r
             graph = build_transition_graph(question_list, seq_len_list, train_dataset.indices, student_num, concept_num)
         elif graph_type == 'DKT':
             graph = build_dkt_graph(dkt_graph_path, concept_num)
-        if use_cuda and graph_type in ['Dense', 'Transition', 'DKT']:
+        # Custom type: Predefined, for a predefined adj matrix
+        elif graph_type == 'Predefined':
+            graph = load_custom_graph(concept_num)
+
+        if use_cuda and graph_type in ['Dense', 'Transition', 'DKT', 'Predefined']:
             graph = graph.cuda()
     return concept_num, graph, train_data_loader, valid_data_loader, test_data_loader
+
+
+# For predefined graph
+# TODO: parameterize dir
+def load_custom_graph(concept_num: int) -> torch.Tensor:
+    # TODO: `./` for run cmd, `../` for notebook
+    adj_matrix = np.load("./predefined_graphs/adj_matrix.npy")
+
+    if adj_matrix.shape[0] < concept_num:
+        raise ValueError("Size of graph provided has smaller number of concepts than in the dataset.")
+    else:
+        return torch.Tensor(adj_matrix[:concept_num, :concept_num])
+
 
 
 def build_transition_graph(question_list, seq_len_list, indices, student_num, concept_num):
